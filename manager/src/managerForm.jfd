@@ -1,0 +1,163 @@
+JFDML JFormDesigner: "7.0.6.0.1131" Java: "11.0.16" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		auxiliary() {
+			"JavaCodeGenerator.defaultVariableModifiers": 1
+		}
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			"defaultCloseOperation": 3
+			"title": "web bytes importer"
+			add( new FormContainer( "javax.swing.JTabbedPane", new FormLayoutManager( class javax.swing.JTabbedPane ) ) {
+				name: "tabbedPane2"
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "panel3"
+					add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+						name: "scrollPane1"
+						add( new FormComponent( "javax.swing.JTable" ) {
+							name: "table_current"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "Center"
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+						name: "panel2"
+						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) ) {
+							name: "panel1"
+							addEvent( new FormEvent( "java.awt.event.ComponentListener", "componentResized", "panel1ComponentResized", true ) )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "b_addURL"
+								"text": "b_addURL"
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "b_delete"
+								"text": "b_delete"
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "b_start"
+								"text": "b_start"
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "b_pause"
+								"text": "b_pause"
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "b_start_all"
+								"text": "b_start_all"
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "b_pause_all"
+								"text": "b_pause_all"
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "b_toHistory"
+								"text": "b_toHistory"
+							} )
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "Center"
+						} )
+						add( new FormComponent( "javax.swing.JComboBox" ) {
+							name: "c_filter_current"
+							"editable": true
+							"toolTipText": "filter"
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "Last"
+						} )
+						add( new FormComponent( "javax.swing.JComboBox" ) {
+							name: "c_url"
+							"editable": true
+							"toolTipText": "input url"
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "First"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "North"
+					} )
+					add( new FormContainer( "javax.swing.JTabbedPane", new FormLayoutManager( class javax.swing.JTabbedPane ) ) {
+						name: "tabbedPane1"
+						add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+							name: "scrollPane2"
+							add( new FormComponent( "javax.swing.JTextArea" ) {
+								name: "textArea1"
+								"rows": 5
+							} )
+						}, new FormLayoutConstraints( null ) {
+							"title": "info"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "South"
+					} )
+				}, new FormLayoutConstraints( null ) {
+					"title": "current"
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "panel4"
+					add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+						name: "scrollPane3"
+						add( new FormComponent( "javax.swing.JTable" ) {
+							name: "table_history"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "Center"
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+						name: "panel5"
+						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) ) {
+							name: "panel6"
+							addEvent( new FormEvent( "java.awt.event.ComponentListener", "componentResized", "panel1ComponentResized", true ) )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "b_reload"
+								"text": "b_reload"
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "b_delete2"
+								"text": "b_delete"
+							} )
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "Center"
+						} )
+						add( new FormComponent( "javax.swing.JComboBox" ) {
+							name: "c_filter_history"
+							"editable": true
+							"toolTipText": "filter"
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "Last"
+						} )
+						add( new FormComponent( "javax.swing.JComboBox" ) {
+							name: "c_url2"
+							"editable": true
+							"toolTipText": "input url"
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "First"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "North"
+					} )
+					add( new FormContainer( "javax.swing.JTabbedPane", new FormLayoutManager( class javax.swing.JTabbedPane ) ) {
+						name: "tabbedPane3"
+						add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+							name: "scrollPane4"
+							add( new FormComponent( "javax.swing.JTextArea" ) {
+								name: "textArea2"
+								"rows": 5
+							} )
+						}, new FormLayoutConstraints( null ) {
+							"title": "info"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "South"
+					} )
+				}, new FormLayoutConstraints( null ) {
+					"title": "history"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 705, 520 )
+		} )
+	}
+}
