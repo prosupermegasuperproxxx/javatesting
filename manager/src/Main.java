@@ -302,8 +302,9 @@ public class Main {
                         ////                form.setSize(800,400);
                         ////                form.setLocationRelativeTo(null);
                         form.setVisible(true);
-                        form.b_start.addActionListener(
-                                getActionListenerfd(form));
+                        
+//                        form.b_start.addActionListener(
+//                                getActionListenerfd(form));
                         //                ranges2.replace()
                     }
                 });

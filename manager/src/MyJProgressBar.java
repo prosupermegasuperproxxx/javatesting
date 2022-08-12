@@ -1,14 +1,11 @@
-import java.util.TreeMap;
 import javax.swing.*;
-import java.awt.*;
-import java.util.Map;
-import java.util.Random;
-
-import javax.swing.JProgressBar;
 import javax.swing.plaf.basic.BasicProgressBarUI;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
+import java.util.TreeMap;
 
 class MyProgressUI extends BasicProgressBarUI {
-    public static final Color bluex      = new Color(120, 30, 255);
+    public static final Color bluex = new Color(120, 30, 255);
 
     private Rectangle r = new Rectangle();
 
@@ -33,10 +30,10 @@ class MyProgressUI extends BasicProgressBarUI {
         // amount of progress to draw
         int amountFull = getAmountFull(b, barRectWidth, barRectHeight);
 
-        Graphics2D g2 = (Graphics2D)g;
+        Graphics2D g2 = (Graphics2D) g;
         g2.setColor(progressBar.getForeground());
 
-        TreeMap<Integer, Integer> r2    = ((MyJProgressBar) progressBar).ranges2;
+        TreeMap<Integer, Integer> r2 = ((MyJProgressBar) progressBar).ranges2;
 
 //            for (int i = 0; i < rng.length; i++) {
 ////                    g2.drawLine(b.left, (barRectHeight/2) + b.top,
@@ -92,9 +89,9 @@ class MyProgressUI extends BasicProgressBarUI {
 //                // draw each individual cell
 //            }
         Stroke oldStroke = g2.getStroke();
-        Stroke newStroke = new BasicStroke((float)barRectHeight,
+        Stroke newStroke = new BasicStroke((float) barRectHeight,
                 BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
-            g2.setStroke(newStroke);
+        g2.setStroke(newStroke);
 //                g2.setStroke(new BasicStroke((float)barRectHeight,
 //                        BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
 //                        0.f, new float[] { cellLength, cellSpacing }, 0.f));
@@ -117,7 +114,7 @@ class MyProgressUI extends BasicProgressBarUI {
 //
 ////                        rr.nextInt(i1-50) + i1*i, (barRectHeight/2) + b.top);
 //            }
-        if(r2!=null && r2.size()>0) {
+        if (r2 != null && r2.size() > 0) {
             final int[] l = {0, 0, 0, 0};
             l[1] = r2.lastKey();
             r2.forEach((max, val) -> {
@@ -184,12 +181,55 @@ class MyProgressUI extends BasicProgressBarUI {
 
 public class MyJProgressBar extends JProgressBar {
 
-        public TreeMap<Integer, Integer> ranges2 = new TreeMap<>();
+    public TreeMap<Integer, Integer> ranges2 = new TreeMap<>();
 
-        public MyJProgressBar() {
-            this.setUI(new MyProgressUI());
-            this.setForeground(Color.blue);
-            this.setIndeterminate(false);
-        }
-
+    public MyJProgressBar() {
+        this.setUI(new MyProgressUI());
+        this.setForeground(Color.blue);
+        this.setIndeterminate(false);
     }
+
+}
+
+class ProgressRenderer extends MyJProgressBar implements TableCellRenderer {
+    //    TableColumn col       col.setCellRenderer(new ProgressRenderer(0, 100));
+    public ProgressRenderer(int min, int max) {
+//            super(min, max);
+        // new progressForm2().new super();
+        super();
+        this.setStringPainted(true);
+    }
+
+
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
+                                                   boolean isSelected, boolean hasFocus, int row, int column) {
+
+
+        int ii = 0;
+        this.ranges2 = null;
+        try {
+            if (value instanceof String)
+                ii = Integer.parseInt((String) value);
+
+            else if (value instanceof Integer)
+                ii = Integer.valueOf((Integer) value);
+            else if (value instanceof TreeMap) {
+                // System.out.println(row + ":"+ column);
+
+                this.ranges2 = (TreeMap<Integer, Integer>) value;
+                this.setValue(ranges2.lastEntry().getValue());
+                // this.ranges2 = (TreeMap<Integer, Integer>) table.getCellEditor(row, column).getCellEditorValue();
+                return this;
+            }
+        } catch (Exception e) {
+
+        }
+        this.setValue(ii);
+
+
+//            this.setValue((Integer) value);
+        return this;
+    }
+}
+

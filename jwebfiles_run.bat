@@ -1,13 +1,17 @@
-md out2
-cd out2
+set temp4class=out2
+set srcdir=\manager\src\
 
-set main=..\manager\src\
+md %temp4class%
+cd %temp4class%
 
-javac -encoding "UTF-8" -d . -cp .;%main%; -sourcepath %main%; %main%*.java
+set relsrc=..%srcdir%
 
-java -cp .;%main%; Main
+javac -encoding "UTF-8" -d . -cp .;%relsrc%; -sourcepath %relsrc%; %relsrc%*.java
+
+cd ..\
+java -cp .;%temp4class%; Main
 
 pause
 
-cd ..
-call j11.bat
+
+call jwebfiles_run.bat

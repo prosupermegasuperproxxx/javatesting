@@ -3,17 +3,15 @@ import javax.swing.border.*;
 
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.TreeMap;
 import java.util.Vector;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.regex.PatternSyntaxException;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import javax.swing.table.*;
 /*
  * Created by JFormDesigner on Sat Jul 30 12:15:22 GMT+03:00 2022
  */
@@ -76,46 +74,6 @@ public class managerForm extends JFrame {
         public static int getHeightMinusWinToolbar() { if (instance == null)  instance = new GetScreenSize(); return height-(insets.top+insets.bottom); }
     }
 
-    public static class ProgressRenderer extends MyJProgressBar implements TableCellRenderer {
-        public ProgressRenderer(int min, int max) {
-//            super(min, max);
-            // new progressForm2().new super();
-            super();
-            this.setStringPainted(true);
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus, int row, int column) {
-                                            
-            
-            int ii = 0;
-            this.ranges2 = null;
-            try {           
-             if(value instanceof String)
-                ii = Integer.parseInt((String) value);
-                
-            else if(value instanceof Integer)
-                ii = Integer.valueOf((Integer) value);
-             else if (value instanceof TreeMap) {
-                // System.out.println(row + ":"+ column);
-                
-                this.ranges2 = (TreeMap<Integer, Integer>) value;
-                this.setValue(ranges2.lastEntry().getValue());
-                // this.ranges2 = (TreeMap<Integer, Integer>) table.getCellEditor(row, column).getCellEditorValue();
-                return this;
-            }
-            }
-            catch (Exception e) {
-                
-            }
-            this.setValue(ii);
-            
-            
-//            this.setValue((Integer) value);
-            return this;
-        }
-    }
 
     public void setupRanges(TreeMap<Integer, Integer> ranges2) {
         TableColumn col = table_current.getColumnModel().getColumn(1);
@@ -123,10 +81,61 @@ public class managerForm extends JFrame {
         // ((ProgressRenderer)table1.getCellRenderer(0, 1)).ranges2 = ranges2;
     }
 
+    class EventHandler {
+        volatile boolean eventNotificationNotReceived;
+        void waitForEventAndHandleIt() {
+            while ( eventNotificationNotReceived ) {
+                java.lang.Thread.onSpinWait();
+            }
+            readAndProcessEvent();
+        }
+
+        void readAndProcessEvent() {
+            // Read event from some source and process it
+              //. . .
+        }
+    }
+
+
     public void loadTables() {
         rows_cur_model = tableFromFile("current.txt", table_current, rows_cur);
         rows_hist_model = tableFromFile("history.txt", table_history, rows_hist);
 
+        final TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(rows_cur_model);
+        table_current.setRowSorter(sorter);
+        ActionListener l = e -> {
+            if(e!=null) {
+                String s = e.getActionCommand();
+                if (s == null || !s.equalsIgnoreCase("comboBoxEdited"))
+                    return;
+            } //System.out.println("2");
+            String text = c_filter_current.getEditor().getItem().toString();
+            // cancelled thread
+            try {
+                sorter.setRowFilter(RowFilter.regexFilter(text));
+            } catch (PatternSyntaxException pse) {
+                System.err.println("Bad regex pattern");
+            }
+
+        };
+
+
+        if(c_filter_current.getEditor()!=null)
+        c_filter_current.getEditor().getEditorComponent().addKeyListener(
+                new KeyListener() {
+                    @Override public void keyTyped(KeyEvent e) {}
+
+                    @Override public void keyPressed(KeyEvent e) {}
+
+                    @Override public void keyReleased(KeyEvent e) {
+                        l.actionPerformed(null);
+                    }
+                }
+        );
+
+
+
+        c_filter_current.addActionListener(l);
 //        Vector<Object> xcv = new Vector<>();
 //        Collections.addAll(xcv, columnNames);
 //        rows_cur.add(xcv);
@@ -152,7 +161,7 @@ public class managerForm extends JFrame {
         table.setRowHeight(24);
         table.setAutoCreateRowSorter(false);
         TableColumn col =  table.getColumnModel().getColumn(PROGRESS_COLUMN);
-        col.setCellRenderer(new managerForm.ProgressRenderer(0, 100));
+        col.setCellRenderer(new ProgressRenderer(0, 100));
         col.setCellEditor(null);//new ComboCellEditor());
         return rows_model;
     }
@@ -183,7 +192,7 @@ public class managerForm extends JFrame {
 //                vals[0] = vals[0].substring(1);  // удалить кавычку
 //                vals[vals.length-1] = vals[vals.length-1].substring(vals[vals.length-1].length()-1); // удалить кавычку
 
-
+                
                 xcv.delete(0, xcv.length());
                 xcv.append("\"");
                 xcv.append( s.get(0) );
@@ -197,23 +206,6 @@ public class managerForm extends JFrame {
         }
     }
 
-    private void initCustom() {
-        String[] columnNames = {"filename", "progress", "filesize loaded", "filesize", "url", "savepath"};
-        Object[][] data = { {"", "", "", "", "", ""}, {"", "", "", "", "", ""}, {"", "", "", "", "", ""}, };
-        TableModel model = new DefaultTableModel(data, columnNames) {
-            @Override public Class<?> getColumnClass(int column) {
-//                return column == 1 ? DefaultComboBoxModel.class : String.class;
-                return column == 1 ? ProgressRenderer.class : String.class;
-            }
-        };
-//////        JTable table = new JTable(model);
-//        table_current.setModel(model);
-//        table_current.setRowHeight(24);
-//        table_current.setAutoCreateRowSorter(true);
-//        TableColumn col = table_current.getColumnModel().getColumn(1);
-//        col.setCellRenderer(new ProgressRenderer(0, 100));
-//        col.setCellEditor(null);//new ComboCellEditor());
-    }
 
 
 
@@ -241,6 +233,8 @@ public class managerForm extends JFrame {
         toolbarBCount = panel1.getComponentCount();
 //        toolbarW = panel1.getWidth();
 //        if(toolbarW<panel1.getComponentCount()/gly.getRows() * toolbarButtonW)
+
+
     }
 
     private void panel1ComponentResized(ComponentEvent e) {
