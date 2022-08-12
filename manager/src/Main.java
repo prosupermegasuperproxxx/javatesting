@@ -1,4 +1,5 @@
 import java.awt.event.ActionListener;
+import java.sql.Time;
 import java.util.*;
 import java.util.function.Function;
 
@@ -280,6 +281,8 @@ public class Main {
                 new Runnable() {
                     @Override
                     public void run() {
+
+
                         //                new Main3().main(null);
                         //                new SetViewportPosition().main(null);
                         //                new progressForm2.ProgressBarUITest().main(null);
@@ -290,8 +293,11 @@ public class Main {
                         //                new Main().mainpro(null);
                         //                createAndShowGUI();
                         final managerForm form = new managerForm();
-                        form.loadTables();
-
+                        form.tablesLoad();
+                        loader.RuntimeHookOnExit.addRuntimeHookOnExit(0, ()->{
+                            System.out.println("saving tables");
+                            form.tablesSave();
+                        });
                         TreeMap<Integer, Integer> ranges2 = new TreeMap<>();
                         ranges2.clear();
                         ranges2.put(0, 0);

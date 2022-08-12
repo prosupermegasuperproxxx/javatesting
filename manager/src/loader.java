@@ -849,4 +849,62 @@ public class loader {
         }
 
     }
+
+    public final static class RuntimeHookOnExit {
+        /**
+         * <br>        usage<br>
+         * <code>      new loader.RuntimeHookOnExit(0, ()->{
+         * <br>             System.out.println("23232323");
+         * <br>        });
+         * </code>
+         * <br>        or  <br>
+         * <code>      loader.RuntimeHookOnExit.addRuntimeHookOnExit(0, ()->{
+         * <br>             System.out.println("1231231");
+         * </code>     });
+         *
+         * @param millis - 0 infinite wait
+         * @param action - ()->{ code }
+         */
+        public RuntimeHookOnExit(long millis, Runnable action) {
+            Runtime.getRuntime().addShutdownHook(
+                    new Thread() {
+                        class PrimeThread extends Thread {
+                            long minPrime;
+
+                            PrimeThread(long minPrime) {
+                                this.minPrime = minPrime;
+                            }
+
+                            public void run() {
+                                // compute primes larger than minPrime
+//                                try {
+//                                    Thread.sleep(1500);
+//                                } catch (InterruptedException e) {
+//                                    e.printStackTrace();
+//                                }
+                                action.run();
+//                                System.out.println("eeee "+ this.minPrime);
+                            }
+                        }
+
+                        public void run() {
+//                            System.out.println("iiiii");
+                            try {
+
+                                PrimeThread et = new PrimeThread(System.currentTimeMillis());
+                                et.start();
+                                et.join(millis);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            System.out.println("ending");
+
+                        }
+                    }
+            );
+        }
+        public static void addRuntimeHookOnExit(long millis, Runnable action) {
+            new RuntimeHookOnExit(millis, action);
+        }
+    }
 }

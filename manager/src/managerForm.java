@@ -4,10 +4,7 @@ import javax.swing.border.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.TreeMap;
-import java.util.Vector;
+import java.util.*;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
@@ -97,45 +94,55 @@ public class managerForm extends JFrame {
     }
 
 
-    public void loadTables() {
-        rows_cur_model = tableFromFile("current.txt", table_current, rows_cur);
-        rows_hist_model = tableFromFile("history.txt", table_history, rows_hist);
 
-        final TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(rows_cur_model);
-        table_current.setRowSorter(sorter);
+
+
+    private void setTableFilter(JTable jTable, DefaultTableModel tableModel, JComboBox cFilterControl) {
+        if(tableModel==null)
+            tableModel = (DefaultTableModel) jTable.getModel();
+        final TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel);
+        jTable.setRowSorter(sorter);
         ActionListener l = e -> {
             if(e!=null) {
+//                System.out.println(e.getSource());
                 String s = e.getActionCommand();
                 if (s == null || !s.equalsIgnoreCase("comboBoxEdited"))
                     return;
             } //System.out.println("2");
-            String text = c_filter_current.getEditor().getItem().toString();
+            String text = "";
+            if(cFilterControl.getEditor()!=null)
+                text = cFilterControl.getEditor().getItem().toString();
+
             // cancelled thread
             try {
                 sorter.setRowFilter(RowFilter.regexFilter(text));
             } catch (PatternSyntaxException pse) {
                 System.err.println("Bad regex pattern");
             }
-
         };
 
-
-        if(c_filter_current.getEditor()!=null)
-        c_filter_current.getEditor().getEditorComponent().addKeyListener(
-                new KeyListener() {
-                    @Override public void keyTyped(KeyEvent e) {}
-
-                    @Override public void keyPressed(KeyEvent e) {}
-
-                    @Override public void keyReleased(KeyEvent e) {
-                        l.actionPerformed(null);
+        if(cFilterControl.getEditor()!=null)
+            cFilterControl.getEditor().getEditorComponent().addKeyListener(
+                    new KeyListener() {
+                        @Override public void keyTyped(KeyEvent e) {}
+                        @Override public void keyPressed(KeyEvent e) {}
+                        @Override public void keyReleased(KeyEvent e) {
+                            l.actionPerformed(null);
+                        }
                     }
-                }
-        );
+            );
+        else
+        cFilterControl.addActionListener(l);
+    }
 
 
 
-        c_filter_current.addActionListener(l);
+    public void tablesLoad() {
+        rows_cur_model = tableFromFile("current.txt", table_current, rows_cur);
+        rows_hist_model = tableFromFile("history.txt", table_history, rows_hist);
+        setTableFilter(table_current, rows_cur_model, c_filter_current);
+        setTableFilter(table_history, null, c_filter_history);
+
 //        Vector<Object> xcv = new Vector<>();
 //        Collections.addAll(xcv, columnNames);
 //        rows_cur.add(xcv);
@@ -143,7 +150,6 @@ public class managerForm extends JFrame {
 //      JTable table = new JTable(model);
 
     }
-
     private static DefaultTableModel tableFromFile(String path, JTable table, Vector<Vector<Object>> rows_vector) {
         System.out.println(path);
         ArrayList<String> list = new ArrayList<>(100);
@@ -164,6 +170,35 @@ public class managerForm extends JFrame {
         col.setCellRenderer(new ProgressRenderer(0, 100));
         col.setCellEditor(null);//new ComboCellEditor());
         return rows_model;
+    }
+
+    public void tablesSave() {
+        tableToFile("current.txt", table_current, rows_cur);
+        tableToFile("history.txt", table_history, rows_hist);
+    }
+    private static boolean tableToFile(String path, JTable table, Vector<Vector<Object>> rows_vector) {
+        System.out.println(path);
+        ArrayList<String> list = new ArrayList<>(100);
+        listXyVector(list, rows_vector, false);
+        StringBuilder sb = new StringBuilder(list.size() * 200);
+        list.forEach(s -> {
+            sb.append(s).append("\n");
+        });
+        loader.StringToFile0(
+//                Arrays.stream(list.toArray(new String[0])).reduce((s, s2) -> {
+//                    s = s + "\n" +s2;
+//                    return s;
+//                }).get()
+                sb.toString()
+                ,
+                path
+//                path+".saved.txt"
+                , false);
+
+
+//        TableColumn col =  table.getColumnModel().getColumn(PROGRESS_COLUMN);
+
+        return true;
     }
 
     private static void listXyVector(ArrayList<String> list, Vector<Vector<Object>> vector2D, boolean direct) {
