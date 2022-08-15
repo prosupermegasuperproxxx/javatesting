@@ -1,13 +1,11 @@
 import java.awt.event.*;
-import javax.swing.border.*;
 
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.swing.table.*;
 /*
  * Created by JFormDesigner on Sat Jul 30 12:15:22 GMT+03:00 2022
@@ -18,14 +16,33 @@ import javax.swing.table.*;
 /**
  * @author Me
  */
+
+
 public class managerForm extends JFrame {
-    public static  DefaultTableModel rows_cur_model = null;
-    public static  DefaultTableModel rows_hist_model;
-    public static final Vector<Vector<Object>> rows_cur = new Vector<>();
-    public static final Vector<Vector<Object>> rows_hist = new Vector<>();
+
+    enum ColumnNames {
+        filename("filename"),
+        progress("progress"),
+        filesize_loaded("filesize loaded"),
+        filesize("filesize"),
+        url("url"),
+        savepath("savepath");
+
+        private String title;
+
+        ColumnNames(String title) {
+            this.title = title;
+        }
+
+    }
+
+    public  DefaultTableModel table_current_rows_model = null;
+    public  DefaultTableModel table_history_rows_model;
+    public final Vector<Vector<Object>> table_current_rows_v = new Vector<>();
+    public final Vector<Vector<Object>> table_history_rows_v = new Vector<>();
     public static final Vector<Object> cols = new Vector<>();
     private static final int PROGRESS_COLUMN = 1;
-    private static final String[] columnNames = {"filename", "progress", "filesize loaded", "filesize", "url", "savepath"};
+    public static final String[] columnNames = {"filename", "progress", "filesize loaded", "filesize", "url", "savepath"};
 
     {
         Collections.addAll(cols, columnNames);
@@ -101,6 +118,7 @@ public class managerForm extends JFrame {
         if(tableModel==null)
             tableModel = (DefaultTableModel) jTable.getModel();
         final TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel);
+
         jTable.setRowSorter(sorter);
         ActionListener l = e -> {
             if(e!=null) {
@@ -138,9 +156,9 @@ public class managerForm extends JFrame {
 
 
     public void tablesLoad() {
-        rows_cur_model = tableFromFile("current.txt", table_current, rows_cur);
-        rows_hist_model = tableFromFile("history.txt", table_history, rows_hist);
-        setTableFilter(table_current, rows_cur_model, c_filter_current);
+        table_current_rows_model = tableFromFile("current.txt", table_current, table_current_rows_v);
+        table_history_rows_model = tableFromFile("history.txt", table_history, table_history_rows_v);
+        setTableFilter(table_current, table_current_rows_model, c_filter_current);
         setTableFilter(table_history, null, c_filter_history);
 
 //        Vector<Object> xcv = new Vector<>();
@@ -173,8 +191,8 @@ public class managerForm extends JFrame {
     }
 
     public void tablesSave() {
-        tableToFile("current.txt", table_current, rows_cur);
-        tableToFile("history.txt", table_history, rows_hist);
+        tableToFile("current.txt", table_current, table_current_rows_v);
+        tableToFile("history.txt", table_history, table_history_rows_v);
     }
     private static boolean tableToFile(String path, JTable table, Vector<Vector<Object>> rows_vector) {
         System.out.println(path);
@@ -227,13 +245,17 @@ public class managerForm extends JFrame {
 //                vals[0] = vals[0].substring(1);  // удалить кавычку
 //                vals[vals.length-1] = vals[vals.length-1].substring(vals[vals.length-1].length()-1); // удалить кавычку
 
-                
+
                 xcv.delete(0, xcv.length());
                 xcv.append("\"");
-                xcv.append( s.get(0) );
+//                String sg = (String) s.get(0);
+//                Objects.requireNonNullElse(s.get(0),"")
+//                xcv.append( sg==null?"":sg );
+                xcv.append( Objects.requireNonNullElse(s.get(0),"") );
                 for (int i = 1; i < s.size(); i++) {
                     xcv.append("\", \"");
-                    xcv.append( s.get(i) );
+//                    xcv.append( s.get(i) );
+                    xcv.append( Objects.requireNonNullElse(s.get(i),"") );
                 }
                 xcv.append("\"");
                 list.add(xcv.toString());
@@ -244,9 +266,38 @@ public class managerForm extends JFrame {
 
 
 
+    private void initCustom() {
+        b_addURL.addActionListener(e -> {
+            String ss = c_url.getEditor().getItem().toString();
+            if(ss.length()==0) return;
+            System.out.println(ss);
+            Vector<Object> xcv = new Vector<>();
+            xcv.setSize(managerForm.columnNames.length);
+            xcv.set(ColumnNames.url.ordinal(),ss);
+            table_current_rows_model.addRow(xcv);
+        } );
+        final BiConsumer<JTable, JTable> moveSelectedFromTo = (table_one, table_two) -> {
+            int selectedRow = table_one.getSelectedRow();
+            if (selectedRow >= 0) {
+                DefaultTableModel oneModel = (DefaultTableModel) table_one.getModel();
+                if(table_two!=null) {
+                    DefaultTableModel twoModel = (DefaultTableModel) table_two.getModel();
+                    Vector vector = oneModel.getDataVector().get(selectedRow);
+                    twoModel.addRow(vector);
+                }
+                oneModel.removeRow(selectedRow);
+            }
+        };
+        b_delete_cur.addActionListener(e -> moveSelectedFromTo.accept(table_current, null));
+        b_delete_hist.addActionListener(e -> moveSelectedFromTo.accept(table_history, null));
+        b_toHistory.addActionListener(e -> moveSelectedFromTo.accept(table_current, table_history));
+        b_reload.addActionListener(e -> moveSelectedFromTo.accept(table_history, table_current));
+
+    }
+
     public managerForm() {
         initComponents();
-//        initCustom();
+        initCustom();
 //        loadTables();
 
 
@@ -302,7 +353,7 @@ public class managerForm extends JFrame {
         panel2 = new JPanel();
         panel1 = new JPanel();
         b_addURL = new JButton();
-        b_delete = new JButton();
+        b_delete_cur = new JButton();
         b_start = new JButton();
         b_pause = new JButton();
         b_start_all = new JButton();
@@ -319,7 +370,7 @@ public class managerForm extends JFrame {
         panel5 = new JPanel();
         panel6 = new JPanel();
         b_reload = new JButton();
-        b_delete2 = new JButton();
+        b_delete_hist = new JButton();
         c_filter_history = new JComboBox();
         c_url2 = new JComboBox();
         tabbedPane3 = new JTabbedPane();
@@ -363,9 +414,9 @@ public class managerForm extends JFrame {
                         b_addURL.setText("b_addURL");
                         panel1.add(b_addURL);
 
-                        //---- b_delete ----
-                        b_delete.setText("b_delete");
-                        panel1.add(b_delete);
+                        //---- b_delete_cur ----
+                        b_delete_cur.setText("b_delete");
+                        panel1.add(b_delete_cur);
 
                         //---- b_start ----
                         b_start.setText("b_start");
@@ -433,21 +484,15 @@ public class managerForm extends JFrame {
 
                     //======== panel6 ========
                     {
-                        panel6.addComponentListener(new ComponentAdapter() {
-                            @Override
-                            public void componentResized(ComponentEvent e) {
-                                panel1ComponentResized(e);
-                            }
-                        });
                         panel6.setLayout(new GridLayout());
 
                         //---- b_reload ----
                         b_reload.setText("b_reload");
                         panel6.add(b_reload);
 
-                        //---- b_delete2 ----
-                        b_delete2.setText("b_delete");
-                        panel6.add(b_delete2);
+                        //---- b_delete_hist ----
+                        b_delete_hist.setText("b_delete");
+                        panel6.add(b_delete_hist);
                     }
                     panel5.add(panel6, BorderLayout.CENTER);
 
@@ -493,7 +538,7 @@ public class managerForm extends JFrame {
     public JPanel panel2;
     public JPanel panel1;
     public JButton b_addURL;
-    public JButton b_delete;
+    public JButton b_delete_cur;
     public JButton b_start;
     public JButton b_pause;
     public JButton b_start_all;
@@ -510,7 +555,7 @@ public class managerForm extends JFrame {
     public JPanel panel5;
     public JPanel panel6;
     public JButton b_reload;
-    public JButton b_delete2;
+    public JButton b_delete_hist;
     public JComboBox c_filter_history;
     public JComboBox c_url2;
     public JTabbedPane tabbedPane3;

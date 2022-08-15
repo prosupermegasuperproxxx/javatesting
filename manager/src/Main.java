@@ -1,12 +1,8 @@
 import java.awt.event.ActionListener;
-import java.sql.Time;
 import java.util.*;
 import java.util.function.Function;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 
 // import static loader.*;
 
@@ -298,6 +294,8 @@ public class Main {
                             System.out.println("saving tables");
                             form.tablesSave();
                         });
+
+
                         TreeMap<Integer, Integer> ranges2 = new TreeMap<>();
                         ranges2.clear();
                         ranges2.put(0, 0);

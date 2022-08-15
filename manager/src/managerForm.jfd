@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "7.0.6.0.1131" Java: "11.0.16" encoding: "UTF-8"
+JFDML JFormDesigner: "7.0.7.0.1134" Java: "11.0.16" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -32,7 +32,7 @@ new FormModel {
 								"text": "b_addURL"
 							} )
 							add( new FormComponent( "javax.swing.JButton" ) {
-								name: "b_delete"
+								name: "b_delete_cur"
 								"text": "b_delete"
 							} )
 							add( new FormComponent( "javax.swing.JButton" ) {
@@ -106,13 +106,12 @@ new FormModel {
 						name: "panel5"
 						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) ) {
 							name: "panel6"
-							addEvent( new FormEvent( "java.awt.event.ComponentListener", "componentResized", "panel1ComponentResized", true ) )
 							add( new FormComponent( "javax.swing.JButton" ) {
 								name: "b_reload"
 								"text": "b_reload"
 							} )
 							add( new FormComponent( "javax.swing.JButton" ) {
-								name: "b_delete2"
+								name: "b_delete_hist"
 								"text": "b_delete"
 							} )
 						}, new FormLayoutConstraints( class java.lang.String ) {
