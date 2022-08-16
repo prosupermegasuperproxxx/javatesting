@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicProgressBarUI;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 class MyProgressUI extends BasicProgressBarUI {
@@ -33,7 +34,7 @@ class MyProgressUI extends BasicProgressBarUI {
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(progressBar.getForeground());
 
-        TreeMap<Integer, Integer> r2 = ((MyJProgressBar) progressBar).ranges2;
+        ArrayList<Long> r2 = ((MyJProgressBar) progressBar).ranges2;
 
 //            for (int i = 0; i < rng.length; i++) {
 ////                    g2.drawLine(b.left, (barRectHeight/2) + b.top,
@@ -114,11 +115,14 @@ class MyProgressUI extends BasicProgressBarUI {
 //
 ////                        rr.nextInt(i1-50) + i1*i, (barRectHeight/2) + b.top);
 //            }
+
         if (r2 != null && r2.size() > 0) {
-            final int[] l = {0, 0, 0, 0};
-            l[1] = r2.lastKey();
-            r2.forEach((max, val) -> {
-                l[2] += (l[0] - val);
+            final Long[] l = {0l, 0l, 0l, 0l};
+            l[1] = r2.get(r2.size()-1);
+            for (int i = 0; i < r2.size()-1; i+=2) {
+                Long val = r2.get(i);
+                Long max = r2.get(i+1);
+                l[2] = l[2] + (l[0] - (val));
                 l[3] += (max - val);
                 if (max > 0) {
                     double per = ((0D + l[0]) / l[1]); //double per = (l[0] * 100D / l[1]) / 100D;
@@ -130,7 +134,7 @@ class MyProgressUI extends BasicProgressBarUI {
                     g2.drawLine(lP, (barRectHeight / 2) + b.top,
                             rP, (barRectHeight / 2) + b.top);
 
-                    if (max < l[1]) {
+                    if (max <= l[1]) { // <
                         g2.setStroke(oldStroke);
                         per = (((double) max) / l[1]);
                         int bP = (int) Math.round(barRectWidth * per);
@@ -139,7 +143,7 @@ class MyProgressUI extends BasicProgressBarUI {
                     }
                 }
                 l[0] = max;
-            });
+            }
 //            amountFull = (int)Math.round(width *
 //                    progressBar.getPercentComplete());
 
@@ -181,7 +185,7 @@ class MyProgressUI extends BasicProgressBarUI {
 
 public class MyJProgressBar extends JProgressBar {
 
-    public TreeMap<Integer, Integer> ranges2 = new TreeMap<>();
+    public ArrayList<Long> ranges2 = null;//new TreeMap<>();
 
     public MyJProgressBar() {
         this.setUI(new MyProgressUI());
@@ -205,20 +209,36 @@ class ProgressRenderer extends MyJProgressBar implements TableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value,
                                                    boolean isSelected, boolean hasFocus, int row, int column) {
 
-
+//        System.out.println(row + ":"+ column);
         int ii = 0;
         this.ranges2 = null;
         try {
-            if (value instanceof String)
+            if (value instanceof String) {
+                if(column==1) {
+
+//                    this.ranges2 = (ArrayList<Long>) value;
+                    ArrayList<Long> longs = Main.getArrayListRange();
+
+//                    String pr = "0-555,556-1023/1024";
+//                        String[] sp = pr.split("/");
+                    Main.stringToLongs((String) value, longs);
+
+//                        int[] rr = new int[24];
+
+                    this.ranges2 = longs;
+                } else
                 ii = Integer.parseInt((String) value);
+
+            }
 
             else if (value instanceof Integer)
                 ii = Integer.valueOf((Integer) value);
-            else if (value instanceof TreeMap) {
-                // System.out.println(row + ":"+ column);
+            else if (value instanceof ArrayList) {
+//                 System.out.println(row + ":"+ column);
 
-                this.ranges2 = (TreeMap<Integer, Integer>) value;
-                this.setValue(ranges2.lastEntry().getValue());
+                this.ranges2 = (ArrayList<Long>) value;
+//                this.setValue(Math.toIntExact(ranges2.get(ranges2.size() - 1)));
+
                 // this.ranges2 = (TreeMap<Integer, Integer>) table.getCellEditor(row, column).getCellEditorValue();
                 return this;
             }
@@ -231,5 +251,7 @@ class ProgressRenderer extends MyJProgressBar implements TableCellRenderer {
 //            this.setValue((Integer) value);
         return this;
     }
+
+
 }
 

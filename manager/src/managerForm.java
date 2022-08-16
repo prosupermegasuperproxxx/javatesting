@@ -41,7 +41,7 @@ public class managerForm extends JFrame {
     public final Vector<Vector<Object>> table_current_rows_v = new Vector<>();
     public final Vector<Vector<Object>> table_history_rows_v = new Vector<>();
     public static final Vector<Object> cols = new Vector<>();
-    private static final int PROGRESS_COLUMN = 1;
+    private static final int PROGRESS_COLUMN = ColumnNames.progress.ordinal();
     public static final String[] columnNames = {"filename", "progress", "filesize loaded", "filesize", "url", "savepath"};
 
     {
@@ -89,11 +89,11 @@ public class managerForm extends JFrame {
     }
 
 
-    public void setupRanges(TreeMap<Integer, Integer> ranges2) {
-        TableColumn col = table_current.getColumnModel().getColumn(1);
-        ((ProgressRenderer) col.getCellRenderer()).ranges2 = ranges2;
-        // ((ProgressRenderer)table1.getCellRenderer(0, 1)).ranges2 = ranges2;
-    }
+//    public void setupRanges(ArrayList<Long> ranges2) {
+//        TableColumn col = table_current.getColumnModel().getColumn(1);
+//        ((ProgressRenderer) col.getCellRenderer()).ranges2 = ranges2;
+//        // ((ProgressRenderer)table1.getCellRenderer(0, 1)).ranges2 = ranges2;
+//    }
 
     class EventHandler {
         volatile boolean eventNotificationNotReceived;
@@ -174,23 +174,28 @@ public class managerForm extends JFrame {
         loader.FileReadToList(path, list);
         listXyVector(list, rows_vector, true);
 
-        DefaultTableModel rows_model = new DefaultTableModel(rows_vector, managerForm.cols);
-        {
-//            @Override public Class<?> getColumnClass(int column) {
-////                return column == 1 ? DefaultComboBoxModel.class : String.class;
-//                return column == 1 ? managerForm.ProgressRenderer.class : String.class;
-//            }
+        DefaultTableModel rows_model = new DefaultTableModel(rows_vector, managerForm.cols)
+//                ;
+        { // called every painting
+            @Override public Class<?> getColumnClass(int column) {
+//                return column == 1 ? DefaultComboBoxModel.class : String.class;
+                return column == PROGRESS_COLUMN ? ProgressRenderer.class : String.class;
+            }
+
         };
         table.setModel(rows_model);
         table.setRowHeight(24);
         table.setAutoCreateRowSorter(false);
-        TableColumn col =  table.getColumnModel().getColumn(PROGRESS_COLUMN);
+        TableColumn col =  table.getColumnModel().getColumn(ColumnNames.progress.ordinal());
         col.setCellRenderer(new ProgressRenderer(0, 100));
         col.setCellEditor(null);//new ComboCellEditor());
+
+//        table.act
         return rows_model;
     }
 
     public void tablesSave() {
+        System.out.println("saving tables");
         tableToFile("current.txt", table_current, table_current_rows_v);
         tableToFile("history.txt", table_history, table_history_rows_v);
     }
@@ -298,9 +303,8 @@ public class managerForm extends JFrame {
     public managerForm() {
         initComponents();
         initCustom();
-//        loadTables();
-
-
+        tablesLoad();
+        Runtime.getRuntime().addShutdownHook( new Thread(this::tablesSave) );
 
         int width = GetScreenSize.getWidthMinusWinToolbar();
         int height = GetScreenSize.getHeightMinusWinToolbar();
@@ -338,10 +342,6 @@ public class managerForm extends JFrame {
 //        }
         if(gly.getRows()!=rows)
             gly.setRows(rows);
-    }
-
-    private void createUIComponents() {
-        // TODO: add custom component creation code here
     }
 
     private void initComponents() {

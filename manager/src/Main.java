@@ -7,7 +7,55 @@ import javax.swing.*;
 // import static loader.*;
 
 public class Main {
+    public static ArrayList<Long> getArrayListRange() {
+        ArrayList<Long> rang = new ArrayList<>() {
+            @Override
+            public String toString() {
+                int sz = this.size();
+                if (sz >= 3) {
+                    long x = this.get(sz - 1);
+                    int count = x < 10000 ? (x < 1000 ? (x < 100 ? (x < 10 ? 1 : 2) : 3) : 4)
+                            : (x < 100000 ? 5 : (x < 1000000 ? 6 : (x < 10000000 ? 7 : 8)));
+//                                    sz-=2;
+                    sz += sz / 2;
+                    StringBuilder sb = new StringBuilder(sz * count);
+                    for (int i = 0; i < this.size() - 1; i++) {
+                        sb.append(this.get(i)).append('-').append(this.get(++i)).append(',');
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    return sb.toString();
+                }
+
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < this.size(); i++) {
+                    sb.append(this.get(i)).append('-');
+                }
+                if (this.size() > 1)
+                    sb.deleteCharAt(sb.length() - 1);
+                return sb.toString();
+            }
+        };
+        return rang;
+    }
+
+    public static void stringToLongs(String value, ArrayList<Long> longs) {
+        String[] spV = value.split(",");
+        for (int i = 0; i < spV.length; i++) {
+            //  do not use in split func ->      ".$|()[{^?*+\\"
+            String[] spMM = spV[i].split("-");
+            if (spMM.length>0) {
+                long min = Long.parseLong((String) spMM[0]);
+                longs.add(min);
+                if (spMM.length>1) {
+                    long max = Long.parseLong((String) spMM[1]);
+                    longs.add(max);
+                }
+            }
+        }
+    }
+
     private static long timeee = 0;
+    private static Thread thr = null;
 
     public static void time2(String m) { // throws InterruptedException {
         //			time2(null);  time2("resized .  %n");
@@ -289,27 +337,30 @@ public class Main {
                         //                new Main().mainpro(null);
                         //                createAndShowGUI();
                         final managerForm form = new managerForm();
-                        form.tablesLoad();
+
                         loader.RuntimeHookOnExit.addRuntimeHookOnExit(0, ()->{
-                            System.out.println("saving tables");
-                            form.tablesSave();
+
                         });
 
 
-                        TreeMap<Integer, Integer> ranges2 = new TreeMap<>();
-                        ranges2.clear();
-                        ranges2.put(0, 0);
-                        ranges2.put(750, 700); // value 0
-                        ranges2.put(3000, 2950); // value 0
+//                        TreeMap<Integer, Integer> ranges2 = new TreeMap<>();
+//                        ranges2.clear();
+//                        ranges2.put(0, 0);
+//                        ranges2.put(750, 700); // value 0
+//                        ranges2.put(3000, 2950); // value 0
 
                         // form.setupRanges(ranges2);
                         ////                form.setSize(800,400);
                         ////                form.setLocationRelativeTo(null);
                         form.setVisible(true);
                         
-//                        form.b_start.addActionListener(
-//                                getActionListenerfd(form));
-                        //                ranges2.replace()
+                        form.b_start.addActionListener(
+                                getActionListenerf(form));
+                        form.b_pause.addActionListener(e -> {
+                            if(thr!= null)
+                                thr.interrupt();
+                                } );
+//                                        ranges2.replace()
                     }
                 });
 
@@ -386,60 +437,119 @@ public class Main {
                                 .getModel()
                                 .getValueAt(sm.getMinSelectionIndex(), 4));
                 int xx = sm.getMinSelectionIndex();
-                TreeMap<Integer, Integer> rang = new TreeMap<>();
-                rang.clear();
-                rang.put(0, 0);
-                rang.put(750, 700); // value 0
-                rang.put(1000, 950); // value 0
-                rang.put(2000, 2000 - 50); // value 0
-                rang.put(3000, 2950); // value 0
+
+                ArrayList<Long> rang = getArrayListRange();
+
+//                TreeMap<Integer, Integer> rang = new TreeMap<>();
+
+//                rang.add(3000l);
+
+                String valueAt = "-1";
+
+
+                try {
+                    Object val = form.table_current.getModel().getValueAt(xx, 1);
+                    if(val!=null)
+                        valueAt = val.toString();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                    System.out.println("errrorrrrr");
+                }
+
+                stringToLongs(valueAt, rang);
+
+                boolean startnew = false;
+                if(rang.size()==2) {
+                    startnew = (rang.get(0).equals(rang.get(1)));
+                } else
+                    startnew = (rang.size()<2) ;
+
+                if(startnew) {
+
+                    rang.add(0l);
+                    rang.add(750l);
+
+                    rang.add(800l);
+                    rang.add(1000l);
+
+                    rang.add(1001l);
+                    rang.add(2000l);
+
+                    rang.add(2001l);
+                    rang.add(3000l);
+
+                }
+
                 // 0-145/100,146-211/146,
                 int[] oz = {0};
-                rang.entrySet().forEach((t) -> {
-                    // rang.put(kk, vv);
-                    if(t.getKey()==0)
-                        return;
-                    // t.setValue(oz[0]);
-                    rang.put(t.getKey(), oz[0]);
-                    oz[0] =t.getKey()+1;
-                    // int vv =t.getValue()+1;
-                    // if(vv<kk) {
 
-                    //     oo[0]++;
-                    // }
-                });
+
 
                 form.table_current.getModel().setValueAt(rang, xx, 1);
 
-                new Thread(() -> {
-                    while (true) {
-                        int[] oo = {0};
-                        rang.entrySet().forEach((t) -> {
-                            int kk =t.getKey();
-                            if(kk==0) return;
-                            int vv =t.getValue()+1;
-                            if(vv<kk) {
-                                rang.put(kk, vv);
-                                oo[0]++;
+                if (thr == null) {
+                    thr = new Thread(() -> {
+                        final int[] oo = {0};
+                        while (true) {
+                            if(thr.isInterrupted())
+                                break;
+                            int i = 0, maxx = rang.size() - 1;
+                            while (i < maxx) {
+                                Long acur = rang.get(i) + 77;
+                                Long amax = rang.get(i + 1);
+                                if (acur < amax) {
+                                    rang.set(i, acur);
+                                    i += 2;
+                                } else {
+                                    if (maxx > 1) {
+                                        rang.remove(i);
+                                        rang.remove(i);
+                                    } else if (maxx == 1) {
+                                        rang.set(i, amax);
+                                    }
+                                    maxx -= 2;
+                                }
+
                             }
-                        });
 
 
-                        form.table_current.getModel().setValueAt(rang, xx, 1);
+//                        String pr = "0-555,556-1023/1024";
+//                        String[] sp = pr.split("/");
+//                        String[] spV = sp[0].split(",");
+//                        String[] spMM = spV[0 + 0].split("-");
+//                        ".$|()[{^?*+\\"
+//                        int[] rr = new int[24];
 
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e1) {
-                            e1.printStackTrace();
+
+                            form.table_current.getModel().setValueAt(rang, xx, 1);
+
+                            try {
+                                System.out.println(rang);
+                                Thread.sleep(310);
+
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();
+                                thr.interrupt();
+                                thr=null;
+                                break;
+                            }
+
+//                        if(oo[0]==0)
+                            if (rang.size() <= 2) {
+                                thr.interrupt();
+                                thr = null;
+                                break;
+                            }
                         }
-                        if(oo[0]==0)
-                            break;
-                    }
 
-                }).start();
+                    });
+                    thr.start();
+                }
             }
         };
     }
+
+
     //        new Game1().setVisible(true);
 
     /*

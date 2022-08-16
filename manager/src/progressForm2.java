@@ -44,11 +44,11 @@ public class progressForm2 {
                     test.jpb.setMinimum(0);
 //                    test.jpb.setValue(1100);
                     test.jpb.ranges2.clear();
-                    test.jpb.ranges2.put(0,0);
-                    test.jpb.ranges2.put(750,700); // value 0
-                    test.jpb.ranges2.put(1000,950); // value 0
-                    test.jpb.ranges2.put(2000,2000-50); // value 0
-                    test.jpb.ranges2.put(3000,2950); // value 0
+//                    test.jpb.ranges2.put(0,0);
+//                    test.jpb.ranges2.put(750,700); // value 0
+//                    test.jpb.ranges2.put(1000,950); // value 0
+//                    test.jpb.ranges2.put(2000,2000-50); // value 0
+//                    test.jpb.ranges2.put(3000,2950); // value 0
 //                    test.jpb.ranges2.replace(test.jpb.ranges2.ceilingKey(3000-10), 2500); // value 0
 
 
